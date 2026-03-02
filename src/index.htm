@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>  
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+                background-color: #ffffff;
+                color: #ffffff;
+            }
+
+            .page {
+                width: 210mm;
+                min-height: 297mm;
+                margin: 0 auto;
+                /* border-radius: 5px; */
+                background: white;
+            }
+
+            @page {
+                size: A4;
+                margin: 0;
+            }
+
+            @media print {
+
+                html,
+                body {
+                    width: 210mm;
+                    height: 297mm;
+                }
+
+                .page {
+                    margin: 0;
+                    border: 0;
+                    border-radius: 0;
+                    width: initial;
+                    min-height: initial;
+                    box-shadow: 0 0 0 0;
+                    background: initial !important;
+                    /* -webkit-print-color-adjust: exact; */
+                    /* print-color-adjust: exact; */
+                    /* page-break-after:; */
+                }
+                .container {
+                    height: calc(100vh - 10px);
+                    margin: 0;
+                    padding-top: 8mm;
+                    padding-bottom: 8mm;
+                    padding-left: 0;
+                    padding-right: 0;
+                
+                }
+                .container {
+                    page-break-inside: auto;
+                    /* page-break-inside: avoid;  */
+                }
+                /* footer {
+                    position: fixed;
+                    bottom: 0;
+                }    */
+            }
+
+            html {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        </style>
+        <style>
+            .meupdf {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                font-family: Helvetica, sans-serif;
+            }
+            .container {
+                color: #000000;
+                
+                padding-top: 8mm;
+                padding-bottom: 8mm;
+                padding-left: 0;
+                padding-right: 0;
+                width: 720px;
+                
+                height: calc(100vh - 80px); 
+                margin:0; 
+                display:flex; 
+                flex-direction:column; 
+
+            }
+            .content {
+                display: block;
+            }
+            footer {
+                margin-top: auto;
+            }
+            .relatoriosPDF {
+                font-size: 10px; 
+            }
+            .relatoriosPDF th {
+                font-weight: bold;
+                color: #000000;
+            }
+            h3 {font-weight: bold;}
+        </style>
+    </head>
+    <body>
+        <div class="meupdf">
+            <div class="container">
+                <header>
+                    <img src="topo-relatorio.jpg" alt="RCT Express"/>		
+                    
+                    <h4>{{cliente.nomefantasia}}</h4>
+                    <h5><b>Relatório de Fechamento #{{fechamento.id}} - Análitico de entre {{fechamento.periodo1}} e {{fechamento.periodo2}}</b></h5>
+                </header>
+
+                <div class="content"> 
+                    <table class="relatoriosPDF" width="100%" border="0" cellspacing="3">
+                        <tr>
+                            <th width="7%">O.S.</th>
+                            <th width="8%">Data</th>
+                            {{#unless relatorioCentroDecusto}}<th width="12%">Solicitante</th>{{/unless}}
+                            <th width="{{configCol.colwidth_funcionario}}">Funcionário</th>
+                            <th width="{{configCol.colwidth_servico}}">Serviço</th>
+                            <th width="9%">Cupom</th>
+                            <th width="10%">Valor</th>
+                        </tr>
+            
+                        {{#each oss}}
+                            
+                            {{#if primeiralinha}}
+                                {{#if relatorioCentroDecusto}}
+                                    <tr>
+                                        <td colspan="{{configCol.colcount}}"><b>Chamada: {{centrodecusto}}</b></td>
+                                    </tr>
+                                {{/if}}
+                            {{/if}}
+                            <!-- linhas intermediárias -->
+                            
+                            <tr>
+                                <td>{{id}}</td>
+                                <td>{{data}}</td>
+                                {{#unless relatorioCentroDecusto}}<td>{{centrodecusto}}</td>{{/unless}}
+                                <td>{{funcionario}}</td>
+                                <td>{{enderecos}}</td>
+                                
+                                {{#if temDescontoTotal}}
+                                    <td>0</td>
+                                    <td>R$ 0,00</td>
+                                {{else}}
+                                    <td>{{cupom}}</td>
+                                    <td>{{valorcliente}}</td>
+                                {{/if}}
+                            </tr>
+                            {{#if temValorAdicional}}
+                                <tr>
+                                    <td colspan="{{configCol.colcount_subtotal}}">&nbsp;</td>
+                                    <td>+R$ {{valoradicional}}</td>
+                                    <td>&nbsp;</td>
+                                </tr>
+                            {{/if}}
+                            {{#if temDescontoParcial}}
+                                <tr>
+                                    <td colspan="{{configCol.colcount_subtotal}}">&nbsp;</td>
+                                    <td>{{#if temDescontoCupom}} - {{descontocupom}} {{/if}}</td>
+                                    <td>{{#if temDescontoValor}} - {{descontovalor}} {{/if}}</td>
+                                </tr>
+                            {{/if}}
+                            
+                            
+                            {{#if ultimalinha}}
+                                <tr>
+                                    <td colspan="{{configCol.colcount_subtotal}}"><b>Subtotal Chamada {{centrodecusto}} [{{subtotal_chamadas}}]</b></td>
+                                    <td><b>{{subtotal_cupom}}</b></td>
+                                    <td><b>{{subtotal_valor}}</b></td>
+                                </tr>
+                                <tr>
+                                    <td colspan="{{configCol.colcount}}"><br><br></td>
+                                </tr>
+                            {{/if}}
+                        {{/each}}
+            
+                        <tr>
+                            <td colspan="{{configCol.colcount}}"><br><br><br></td>
+                        </tr>
+                        <tr>
+                            <td colspan="{{configCol.colcount_totais}}"> </td>
+                            <td colspan="2">Total de O.S.:</td>
+                            <td>{{resumos.total_os}}</td>
+                        </tr>
+                        {{#if resumo.temDescontoCupom}}
+                            <tr>
+                                <td colspan="{{configCol.colcount_totais}}"> </td>
+                                <td colspan="2">Subtotal cupom:</td>
+                                <td> {{resumos.subtotal_cupom}}</td>
+                            </tr>
+                        
+                            <tr>
+                                <td colspan="{{configCol.colcount_totais}}"> </td>
+                                <td colspan="2">Descontos cupons:</td>
+                                <td>{{resumos.total_desconto_cupom}}</td>
+                            </tr>
+            
+                        {{/if}}
+                        <tr>
+                            <td colspan="{{configCol.colcount_totais}}"> </td>
+                            <td colspan="2">Total Cupom:</td>
+                            <td>{{resumos.total_cupom}}</td>
+                        </tr>
+                        {{#if resumo.temValorExtra}}
+                        <tr>
+                            <td colspan="{{configCol.colcount_totais}}"> </td>
+                            <td colspan="2">Total em dinheiro:</td>
+                            <td>{{resumos.total_adicional_valor}}</td>
+                        </tr>
+                        {{/if}}
+                        <tr>
+                            <td colspan="{{configCol.colcount_totais}}"> </td>
+                            <td colspan="2"><b>Total{{#if cliente.temValorAdicional}} Regus{{/if}}:</b></td>
+                            <td><b>{{resumos.total_valor}}</b></td>
+                        </tr>
+            
+                    </table>
+                    <br>
+                    <hr>
+                    <div style="text-align: right; margin-top: -2px; font-size: 7px;">{{dataRelatorio}}</div>
+                </div>
+                <footer>
+                    <img src="rodape-relatorio.jpg" alt="Contato RCT Express"/>
+                </footer>
+            </div>   
+        </div>
+    </body>
+</html>
